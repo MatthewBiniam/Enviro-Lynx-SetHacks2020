@@ -7,7 +7,7 @@ from sklearn import linear_model
 from sklearn import isotonic
 
 def get_data():
-    air_data_path = '../data/AirData.csv'
+    air_data_path = '../Enviro Lynx Data/AirData.csv'
     df = pd.read_csv(air_data_path)
 
     # Reuse of x-axis
@@ -17,124 +17,96 @@ def get_data():
 
     return df, years, ryears, hundred_years
 
+def predict(data, model):
+    """
+    ret: int year, float value
+    Finds the year when a given parameter will be reacher
+    Finds the value of an environmental issue at a given year
+    """
+    minimum = int(data[-1] + 1)
+    find_year_inp = float(input(f'Enter a value greater than {minimum}\n'))
+    find_val_inp = int(input(f'Enter a year greater than 2019\n'))
+
+    # Only allows for future predictions
+    try:
+        assert find_year_inp > minimum
+    except:
+        print(f'Please enter a value larger than {minimum}')
+        find_year_inp = float(input(f'Enter a value greater than {minimum}\n'))
+
+    try:
+        assert find_val_inp >= 2020
+    except:
+        print(f'Please enter a year larger than 2019')
+        find_val_inp = int(input(f'Enter a year greater than 2019\n'))
+
+    year = int(((find_year_inp - model.intercept_) / model.coef_)[0]) # Given user specified input value
+    value = model.predict([[find_val_inp]])[0] # Given user specified year
+
+    return year, value
 
 def population():
+    """
+    ret: int year, float value
+    Value is humans per kilometre squared (based off land surface area)
+
+    """
     df , years, ryears, hundred_years = get_data()
     population = np.array(df['Population Density'])
 
     # Training model
     reg = linear_model.LinearRegression()
     reg.fit(ryears, population)
+    year, value = predict(population, reg)
 
-    # Predict based off input
-    minimum = int(population[0] + 1)
-    inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    try:
-        assert inp > minimum
-    except:
-        print(f'There is no historical data for this input. Please enter a value larger than {minimum}')
-        inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    year = (inp - reg.intercept_) / reg.coef_
-
-    if year[0] < 2020:
-        return f'In the year {int(year[0])} there were {inp} humans per km^2'
-    else:
-        return f'By year {int(year[0])} there will be {inp} humans per km^2'
+    return year, value
 
 def carbon_dioxide():
+    """
+    ret: int year, float value
+    Value is CO2 emissions in kilotonnes in a year
+
+    """
     df , years, ryears, hundred_years = get_data()
-    # Carbon emissions, kilotons
     carbon = np.array(df['CO2 emissions (kt)'])
 
     # Training and fitting
     reg = linear_model.LinearRegression()
     reg.fit(ryears, carbon)
+    year, value = predict(carbon, reg)
 
-    # Predict based off input
-    minimum = int(carbon[0] + 1)
-    inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    try:
-        assert inp > minimum
-    except:
-        print(f'There is no historical data for this input. Please enter a value larger than {minimum}')
-        inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    year = (inp - reg.intercept_) / reg.coef_
-
-    if year[0] < 2020:
-        return f'In the year {int(year[0])} there were {inp} kilotonnes of carbon emitted'
-    else:
-        return f'By year {int(year[0])} there will be {inp} kilotonnes of carbon emitted'
-
+    return year, value
 
 def methane():
-    df , years, ryears, hundred_years = get_data()
+    """
+    ret: int year, float value
+    Value is methane emissions in kilotonnes in a year
 
-    # Methane emissions 
+    """
+    df , years, ryears, hundred_years = get_data()
     methane = np.array(df['Methane emissions (kt)'])
-    fig = plt.figure(figsize=(1,1))
-    ax = fig.add_axes([1,1,5,5])
-    plot = ax.plot(years,methane)
 
     # Training and fitting
     reg = linear_model.LinearRegression()
     reg.fit(ryears, methane)
+    year, value = predict(methane, reg)
 
-    # Predict based off input
-    minimum = int(methane[0] + 1)
-    inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    try:
-        assert inp > minimum
-    except:
-        print(f'There is no historical data for this input. Please enter a value larger than {minimum}')
-        inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    year = (inp - reg.intercept_) / reg.coef_
-
-    if year[0] < 2020:
-        return f'In the year {int(year[0])} there were {inp} kilotonnes of methane emitted'
-    else:
-        return f'By year {int(year[0])} there will be {inp} kilotonnes of methane emitted'
+    return year, value
 
 def nitrogen_dioxide():
     df , years, ryears, hundred_years = get_data()
     # Methane emissions 
     nox = np.array(df['Nitrous oxide emissions(kt)'])
-    fig = plt.figure(figsize=(1,1))
-    ax = fig.add_axes([1,1,5,5])
-    plot = ax.plot(years,nox)
 
     # Training and fitting
     reg = linear_model.LinearRegression()
     reg.fit(ryears, nox)
+    year, value = predict(nox, reg)
 
-    # Predict based off input
-    minimum = int(nox[0] + 1)
-    inp = float(input(f'Enter a value greater than {minimum}\n'))
+    return year, value
 
-    try:
-        assert inp > minimum
-    except:
-        print(f'There is no historical data for this input. Please enter a value larger than {minimum}')
-        inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    year = (inp - reg.intercept_) / reg.coef_
-
-    if year[0] < 2020:
-        return f'In the year {int(year[0])} there were {inp} kilotonnes of nitrous oxide emitted'
-    else:
-        return f'By year {int(year[0])} there will be {inp} kilotonnes of nitrous oxide emitted'
-
-    # Isotonic regression
-    #iso = isotonic.IsotonicRegression() 
-    #iso.fit(years, nox, sample_weight=2) # 1D array
-    #plot = ax.plot(years, reg.predict(ryears))
-
-print(population())
-print(carbon_dioxide())
-print(methane())
-print(nitrogen_dioxide())
+if '__name__' == '__main__':
+    print(population())
+    print(carbon_dioxide())
+    print(methane())
+    print(nitrogen_dioxide())
