@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn import linear_model
-from sklearn import isotonic
 
 def get_data():
     air_data_path = '../Enviro Lynx Data/AirData.csv'
