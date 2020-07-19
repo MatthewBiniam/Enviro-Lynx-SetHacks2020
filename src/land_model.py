@@ -111,9 +111,9 @@ def population(year=None, value=None):
         value = reg.predict([[year]])[0] # Given user specified year
         return value
 
-#if '__name__' == '__main__':
-print(forest_area(year=2020, value=39899))
-#print(urban_population()) # Test
-print(agriculture_area(year=2018, value=20))
-print(population(year=2030, value=298298))
+if '__name__' == '__main__':
+    print(forest_area(year=2020, value=39899))
+    #print(urban_population()) # Test
+    print(agriculture_area(year=2018, value=20))
+    print(population(year=2030, value=298298))
 

@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn import linear_model
 from predictor import predict
 
-def get_data():
+def get_data(year=None, value=None):
     land_data_path = '../Enviro Lynx Data/WaterData.csv'
     df = pd.read_csv(land_data_path)
 
@@ -17,49 +17,97 @@ def get_data():
 
     return df, years, ryears
 
-def ocean_temperatures():
-    # Ocean Temperature
+def ocean_temperatures(year=None, value=None):
+    df, years, ryears = get_data()
+    # -999. is invalid value, fill in with filler data
     temp = df['Temp (C)']
     temp = temp.replace(-999., 25)
     ocean_temp = np.array(temp)
 
-    # Linear model
     reg = linear_model.LinearRegression()
     reg.fit(ryears, ocean_temp )
 
-    years, value = predict(ocean_temp, reg)
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0])
+        value = reg.predict([[year]])[0]
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0])
+        return year
+    else:
+        value = reg.predict([[year]])[0]
+        return value
 
-    return years, value
 
 
-def ph_scale():
+def ph_scale(year=None, value=None):
+    df, years, ryears = get_data()
     ph = df['PH scale']
     ph = ph.replace(-999., 8.1)
-    ph_arr = np.array(ph)
+    ph_data = np.array(ph)
 
-    # Linear model
     reg = linear_model.LinearRegression()
-    reg.fit(ryears, ph_arr)
+    reg.fit(ryears, ph_data)
 
-    years, value = predict(ph_arr, reg)
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0])
+        value = reg.predict([[year]])[0]
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0])
+        return year
+    else:
+        value = reg.predict([[year]])[0]
+        return value
 
-    return years, value
 
 
-def seawater_carbon():
+def seawater_carbon(year=None, value=None):
+    df , years, ryears = get_data()
     seawater = df.iloc[:, 4] # ppm
     seawater = seawater.replace(-999., 330)
     seawater_carbon = np.array(seawater)
 
-    # Linear model
     reg = linear_model.LinearRegression()
     reg.fit(ryears, seawater_carbon)
 
-    years, value = predict(seawater_carbon)
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0])
+        value = reg.predict([[year]])[0]
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0])
+        return year
+    else:
+        value = reg.predict([[year]])[0]
+        return value
 
-    return years, values
+def population(year=None, value=None):
+    """
+    ret: int year, float value
+    Value is humans per kilometre squared (based off land surface area)
 
-#print(seawater_carbon())
-print(ocean_temperatures())
-print(ph_scale())
-print(seawater_carbon())
+    """
+    df , years, ryears = get_data()
+    population_data = np.array(df['Population Density'])
+
+    # Training model
+    reg = linear_model.LinearRegression()
+    reg.fit(ryears, population_data)
+
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        value = reg.predict([[year]])[0] # Given user specified year
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        return year
+    else:
+        value = reg.predict([[year]])[0] # Given user specified year
+        return value
+
+if '__name__' == '__main__':
+    print(population(year=2020, value=50))
+    print(ocean_temperatures(year=20000, value=26.0))
+    print(ph_scale(year=2020, value=7))
+    print(seawater_carbon(year=2020, value=400))

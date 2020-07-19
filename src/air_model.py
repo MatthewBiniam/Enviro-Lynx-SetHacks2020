@@ -121,8 +121,8 @@ def nitrogen_dioxide(year=None, value=None):
         value = reg.predict([[year]])[0] # Given user specified year
         return value
 
-#if '__name__' == '__main__':
-print(population(value=100, year=2020))
-print(carbon_dioxide(value=832897))
-print(methane(value=21328748))
-print(nitrogen_dioxide(value=3948398))
+if '__name__' == '__main__':
+    print(population(value=100, year=2020))
+    print(carbon_dioxide(value=832897))
+    print(methane(value=21328748))
+    print(nitrogen_dioxide(value=3948398))
