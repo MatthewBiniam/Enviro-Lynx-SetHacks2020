@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 
 from sklearn import linear_model
-from predictor import predict
 
 def get_data():
     """
@@ -16,7 +15,7 @@ def get_data():
     ryears: reshaped 1D vector to 2D matrix, sklearn requires 2D
     years: used for x-axis
     """
-    air_data_path = '../Enviro Lynx Data/AirData.csv'
+    air_data_path = 'Enviro Lynx Data/AirData.csv'
     df = pd.read_csv(air_data_path)
 
     # Reuse of x-axis
@@ -26,23 +25,33 @@ def get_data():
     return df, years, ryears
 
 
-def population():
+def population(year=None, value=None):
     """
     ret: int year, float value
     Value is humans per kilometre squared (based off land surface area)
 
     """
     df , years, ryears = get_data()
+    pass_input = (year, value)
     population_data = np.array(df['Population Density'])
+    minimum = int(population_data[-1] + 1) # Minimum value of input
 
     # Training model
     reg = linear_model.LinearRegression()
     reg.fit(ryears, population_data)
-    year, value = predict(population_data, reg)
 
-    return year, value
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        value = reg.predict([[year]])[0] # Given user specified year
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        return year
+    else:
+        value = reg.predict([[year]])[0] # Given user specified year
+        return value
 
-def carbon_dioxide():
+def carbon_dioxide(year=None, value=None):
     """
     ret: int year, float value
     Value is CO2 emissions in kilotonnes in a year
@@ -50,44 +59,70 @@ def carbon_dioxide():
     """
     df , years, ryears = get_data()
     carbon = np.array(df['CO2 emissions (kt)'])
+    minimum = int(carbon[-1] + 1)
 
     # Training and fitting
     reg = linear_model.LinearRegression()
     reg.fit(ryears, carbon)
-    year, value = predict(carbon, reg)
 
-    return year, value
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        value = reg.predict([[year]])[0] # Given user specified year
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        return year
+    else:
+        value = reg.predict([[year]])[0] # Given user specified year
+        return value
 
-def methane():
+def methane(year=None, value=None):
     """
     ret: int year, float value
     Value is methane emissions in kilotonnes in a year
 
     """
     df , years, ryears = get_data()
-    methane = np.array(df['Methane emissions (kt)'])
+    methane_data = np.array(df['Methane emissions (kt)'])
+    minimum = int(methane_data[-1] + 1)
 
     # Training and fitting
     reg = linear_model.LinearRegression()
-    reg.fit(ryears, methane)
-    year, value = predict(methane, reg)
+    reg.fit(ryears, methane_data)
 
-    return year, value
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        value = reg.predict([[year]])[0] # Given user specified year
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        return year
+    else:
+        value = reg.predict([[year]])[0] # Given user specified year
+        return value
 
-def nitrogen_dioxide():
+def nitrogen_dioxide(year=None, value=None):
     df , years, ryears = get_data()
-    # Methane emissions 
     nox = np.array(df['Nitrous oxide emissions(kt)'])
+    minimum = int(nox[-1] + 1)
 
     # Training and fitting
     reg = linear_model.LinearRegression()
     reg.fit(ryears, nox)
-    year, value = predict(nox, reg)
 
-    return year, value
+    if value and year:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        value = reg.predict([[year]])[0] # Given user specified year
+        return year, value
+    elif value:
+        year = int(((value- reg.intercept_) / reg.coef_)[0]) # Given user specified input value
+        return year
+    else:
+        value = reg.predict([[year]])[0] # Given user specified year
+        return value
 
 #if '__name__' == '__main__':
-print(population())
-print(carbon_dioxide())
-print(methane())
-print(nitrogen_dioxide())
+print(population(value=100, year=2020))
+print(carbon_dioxide(value=832897))
+print(methane(value=21328748))
+print(nitrogen_dioxide(value=3948398))
