@@ -1,49 +1,30 @@
+#TODO
+# - Fix minimum years based on the data set
+# - Consider refactoring predict() as a decorator
 #!/usr/bin/env python
 # coding: utf-8
+import pickle
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from sklearn import linear_model
+from predictor import predict
 
 def get_data():
+    """
+    ret: dataframe df, ndarray years, ndarray ryears
+    ryears: reshaped 1D vector to 2D matrix, sklearn requires 2D
+    years: used for x-axis
+    """
     air_data_path = '../Enviro Lynx Data/AirData.csv'
     df = pd.read_csv(air_data_path)
 
     # Reuse of x-axis
     years = np.array(df['Year'])
     ryears = years.reshape(-1,1) # Regression model needs a 2D column vector
-    hundred_years = np.arange(2020,2121).reshape(-1,1)
 
-    return df, years, ryears, hundred_years
+    return df, years, ryears
 
-def predict(data, model):
-    """
-    ret: int year, float value
-    Finds the year when a given parameter will be reacher
-    Finds the value of an environmental issue at a given year
-    """
-    minimum = int(data[-1] + 1)
-    find_year_inp = float(input(f'Enter a value greater than {minimum}\n'))
-    find_val_inp = int(input(f'Enter a year greater than 2019\n'))
-
-    # Only allows for future predictions
-    try:
-        assert find_year_inp > minimum
-    except:
-        print(f'Please enter a value larger than {minimum}')
-        find_year_inp = float(input(f'Enter a value greater than {minimum}\n'))
-
-    try:
-        assert find_val_inp >= 2020
-    except:
-        print(f'Please enter a year larger than 2019')
-        find_val_inp = int(input(f'Enter a year greater than 2019\n'))
-
-    year = int(((find_year_inp - model.intercept_) / model.coef_)[0]) # Given user specified input value
-    value = model.predict([[find_val_inp]])[0] # Given user specified year
-
-    return year, value
 
 def population():
     """
@@ -51,13 +32,13 @@ def population():
     Value is humans per kilometre squared (based off land surface area)
 
     """
-    df , years, ryears, hundred_years = get_data()
-    population = np.array(df['Population Density'])
+    df , years, ryears = get_data()
+    population_data = np.array(df['Population Density'])
 
     # Training model
     reg = linear_model.LinearRegression()
-    reg.fit(ryears, population)
-    year, value = predict(population, reg)
+    reg.fit(ryears, population_data)
+    year, value = predict(population_data, reg)
 
     return year, value
 
@@ -67,7 +48,7 @@ def carbon_dioxide():
     Value is CO2 emissions in kilotonnes in a year
 
     """
-    df , years, ryears, hundred_years = get_data()
+    df , years, ryears = get_data()
     carbon = np.array(df['CO2 emissions (kt)'])
 
     # Training and fitting
@@ -83,7 +64,7 @@ def methane():
     Value is methane emissions in kilotonnes in a year
 
     """
-    df , years, ryears, hundred_years = get_data()
+    df , years, ryears = get_data()
     methane = np.array(df['Methane emissions (kt)'])
 
     # Training and fitting
@@ -94,7 +75,7 @@ def methane():
     return year, value
 
 def nitrogen_dioxide():
-    df , years, ryears, hundred_years = get_data()
+    df , years, ryears = get_data()
     # Methane emissions 
     nox = np.array(df['Nitrous oxide emissions(kt)'])
 
@@ -105,8 +86,8 @@ def nitrogen_dioxide():
 
     return year, value
 
-if '__name__' == '__main__':
-    print(population())
-    print(carbon_dioxide())
-    print(methane())
-    print(nitrogen_dioxide())
+#if '__name__' == '__main__':
+print(population())
+print(carbon_dioxide())
+print(methane())
+print(nitrogen_dioxide())
